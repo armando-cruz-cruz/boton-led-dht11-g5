@@ -22,6 +22,8 @@ const int BOTON3=15; //Sobre carga de funcionamiento
 // Variables
 int dato1,dato2,dato3; //Botones
 float t;  //Temperatura
+long timeNow, timeLast; // Variables de control de tiempo no bloqueante
+int wait = 2000;  // Indica la espera cada 5 segundos para envío de mensajes MQTT
 // Definición de objetos
 DHT dht(DHTPIN, DHTTYPE);
 // Condiciones iniciales - Se ejecuta sólo una vez al energizar
@@ -37,16 +39,22 @@ void setup() {// Inicio de void setup ()
   Serial.begin(115200);
   Serial.println(F("Conexion iniciada."));
   dht.begin();
+  timeLast = millis (); // Inicia el control de tiempo
+  lecturaSensor();
 }// Fin de void setup
 
 // Cuerpo del programa - Se ejecuta constamente
 void loop() {// Inicio de void loop
-  delay(200);
-  lecturaSensor();
   lecturaBotones();
-  impresionDatos();
   logica();
+  timeNow = millis(); // Control de tiempo para esperas no bloqueantes
+  if (timeNow - timeLast > wait) { // lee temperatura e imprime datos cada 2 segundos
+    timeLast = timeNow; // Actualización de seguimiento de tiempo
+    lecturaSensor();
+    impresionDatos();
+  }
 }// Fin de void loop
+
 
 // Funciones del usuario
 //Funcion que toma la lectura del sensor DHT11
